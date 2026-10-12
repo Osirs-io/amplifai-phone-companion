@@ -1,96 +1,24 @@
-# AMPLIFai Phone 2026.10.08-rc6 companion source
+# AMPLIFai Phone — Intel Mac support
 
-This package is prepared for the matching `2026.10.08-rc6` Mac app, build
-`26100806`; publication and binary checksums are separate release steps. The
-filtered receiver drains unselected full-backup bytes, while every retained
-write and parsing copy checks real Mac storage with a further 2 GiB reserve.
-It distinguishes an early host-space refusal from generic collection failure
-and does not report a zero-byte preflight as backup file progress. A bounded
-safe failure code can be sent automatically to the AMPLIFai diagnostics route
-after fresh local approval, with visible delivery status. No backup files,
-phone records, names, passwords, paths or raw exceptions are reported.
-Synthetic and local build proof is not real phone or account-save proof.
-This revision treats a missing selected optional call or SMS database as an
-explicit unavailable source rather than discarding otherwise valid captured
-sources. A missing contacts database and any invalid selected-file size,
-identity, or decryption still stop processing. The app reports bounded distinct
-processing codes for malformed backup controls, selected payload failures, and
-unsupported contacts schema; these codes do not disclose phone data or prove
-the owner's previously observed generic processing failure is fixed.
-This revision also preserves a contact's complete supported phone/email set
-instead of slicing after 20 values, and keeps an actively receiving backup
-alive without a total elapsed-time cutoff. Explicit safety bounds still stop
-unsupported source volumes; this is not unlimited-history proof.
-The current local bridge also reports observed source rows separately from
-selected rows and keeps the Mac review open until the browser confirms receipt
-of its account-save acknowledgment. These safeguards do not prove a real
-device-to-account save; the matching website release must be qualified.
+This branch adds an **x86_64 Mac build based on Jeff's published RC23 source**. It targets Intel Macs running macOS 14 or later. It preserves the current collection fixes and all 102 Python dependency versions while building the missing Intel encryption dependency from verified source.
 
-The project-authored companion is Copyright (C) 2026 OSIRS LLC and licensed
-under **GPL-3.0-or-later**. See `COPYRIGHT` for the scope and warranty notice,
-`LICENSE` for the GPLv3 text, and `THIRD-PARTY-NOTICES.txt` for retained upstream
-notices. The separate private website/backend source is not part of this package.
+- [Build and release handoff for Jeff](docs/INTEL-MAC-HANDOFF.md)
+- [Verification results and remaining device checks](docs/INTEL-VERIFICATION.md)
+- [Native Intel build workflow](.github/workflows/macos-intel.yml)
+- [Exact RC23 source provenance](docs/rc23-source-baseline.json)
 
-This repository also retains Android source from its separate release; the
-matching rc6 source ZIP is the Mac-only corresponding-source package.
+The workflow produces a separate ad-hoc signed Intel candidate, matching source inputs, checksums and test receipts. Developer ID signing, notarization, a normal downloaded installation and a real Intel Mac/iPhone/account test are separate release requirements. Read the verification record for the observed results; this branch does not claim a finished customer release.
 
-This is the corresponding-source view for the macOS arm64 companion and its
-frozen Python helper. It is not the signed app or installer. The release ZIP includes the source and
-build inputs matched to the selected artifact inventory; it does not claim a
-byte-for-byte reproducible binary build or verified operation on an owner phone.
+## For Jeff
 
-## Contents
+Build this branch directly, or apply the focused changes after imported RC23 baseline commit `81ecfb5` to the matching published source layout. The baseline came from the verified RC23 source ZIP because the upstream `main` branch was older. If the current collector has advanced, reconcile the changes individually rather than replacing newer collector code.
 
-- `source/`: project-authored Swift/Python companion, tests, exact dependency
-  lock, logo and build/packaging scripts. No Android app or private account/web
-  implementation is included.
-- `third_party/source_archives/`: checksum-verified exact Python, native and
-  Rust source archives. The complete candidate contains 158 archives. All 102
-  pinned Python build inputs remain available; the package matrix marks which
-  distributions were observed in the frozen helper.
-- `third_party/notices/`: byte-preserved upstream notices with per-file hashes.
-  The readable aggregate retains both runtime and build-source evidence; it
-  does not change the upstream license choices. Originals govern any character
-  that could not be represented in the UTF-8 aggregate.
-- `third_party/reconciliation.json`: selected app hashes, native source mapping,
-  runtime hooks, cryptography SBOM/source closure and remaining validation gates.
-- `third_party/package-file-manifest.json`: SHA-256 for every package file
-  except the manifest itself. `bundle-scan-report.json` records the scoped
-  publication-path and archive/notice integrity check.
+The changes do not deploy a website, modify accounts, publish to the canonical updater, or change the existing Apple-silicon installer. Intel update checks remain disabled until an appropriate signed Intel feed is qualified. The website must also expose the Intel installer and permit the Intel setup/pairing path; the handoff names those integration points.
 
-## Build and test
+## Source and licensing
 
-Requires an Apple Silicon Mac, Xcode Command Line Tools (Swift), Python 3.12+
-for the audit tools, and `uv`. Build tools are developer prerequisites, not
-requirements for eventual installer users. The portable helper uses Python
-3.12 and the exact hash-pinned lock. Upstream source archives, Cargo.lock,
-OpenSSL SBOM build flags and the standalone CPython build/patch recipe are
-retained for source inspection or rebuilding dependency wheels/interpreter.
-The ordinary app build consumes hash-pinned wheels; it does not rebuild those
-native dependencies from source.
+The project-authored companion is Copyright (C) 2026 OSIRS LLC and licensed under **GPL-3.0-or-later**. See [COPYRIGHT](COPYRIGHT), [LICENSE](LICENSE), and [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt). The separate private website/backend source is not included.
 
-```sh
-cd source
-./script/build_portable_candidate.sh --isolated
-PYTHONPATH=collector:collector/tests uv run --python 3.12 \
-  --with-requirements collector/portable-requirements.lock \
-  python -m unittest discover -s collector/tests
-```
+`source/` contains the RC23 Swift/Python companion, tests, locked dependencies, logos and build scripts, plus the Intel changes. The repository retains the independently versioned Android source.
 
-Isolated builds create a separate local ad-hoc-signed development candidate
-and preserve existing app copies. Building does not connect to a phone. The
-native Connect action requires the owner's own USB/Trust/backup decisions;
-refer to `source/collector/README.md` for retained-history limitations and
-temporary-data handling. Public distribution still requires source-to-binary
-review, a verified signed/stapled release artifact and normal fresh-install/
-device tests.
-
-## Source integrity
-
-The 158-archive candidate includes the 102 Python sdists, CPython 3.12.12 and
-its 20260203 standalone build recipe, OpenSSL 4.0.2 and 32 external Cargo
-packages identified by cryptography, plus bzip2 1.0.8, Expat 2.6.3, mpdecimal
-4.0.0, OpenSSL 3.5.5, SQLite 3.50.4 and xz 5.8.1 from the interpreter recipe.
-The selected app inventory records its exact file hashes and seven native paths.
-The package contains all enumerated source inputs and 319 notice files;
-it does not equate manifest coverage with legal certainty or a binary rebuild.
+The large, unchanged third-party source package is in [Jeff's RC23 release](https://github.com/JmooreOsirs/amplifai-phone-companion/releases/tag/macos-2026.10.12-rc23-release), identified by URL and SHA-256 in the provenance receipt. Successful Intel candidate releases attach the additional exact Intel Python, OpenSSL and cryptography/Rust source inputs and notices alongside the corresponding authored source. No byte-for-byte reproducible-build claim is made.

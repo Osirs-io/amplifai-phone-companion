@@ -47,6 +47,8 @@ Supply Rust/Cargo 1.98.0 before preparing dependencies. The workflow pins the In
 
 ## Research and support lifetime
 
+The macOS 14 floor is primarily the current interface/deployment target, not an identified requirement of the iPhone collection protocol. Read-only compiler probes found a focused route for macOS 13: replace the ten two-argument SwiftUI `onChange` uses in `ContentView.swift` and `CollectionStatusPanel.swift` with compatible one-value handlers (the old value is unused), then rebuild all native inputs and qualify on 13. macOS 12 additionally requires alternatives for `ViewThatFits` and `defaultSize`. Those backports are not included or qualified in this macOS 14 candidate; do not simply lower `LSMinimumSystemVersion` or promise older-OS support.
+
 - Apple still documents Intel targets. Xcode 27's development host requires Apple silicon, but its SDK supports Universal apps targeting older macOS versions: https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes
 - All executable components must include the target architecture: https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
 - Current native Intel hosted runners: https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job
