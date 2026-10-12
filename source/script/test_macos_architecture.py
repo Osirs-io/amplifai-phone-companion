@@ -11,9 +11,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
-from verify_macos_architecture import HELPER, audit, parse_load_commands
+from verify_macos_architecture import HELPER, audit, loader_path, parse_load_commands, is_system
 
 
 TOOLS_AVAILABLE = sys.platform == "darwin" and all(
@@ -144,6 +145,11 @@ class BundleArchitectureTests(unittest.TestCase):
                        check=True, capture_output=True)
         self.assert_fails("Unresolved or external dependency /usr/local/")
 
+    def test_apple_webkit_install_name_is_allowed(self):
+        self.compile(self.main, flags=("-framework", "WebKit"))
+        receipt = self.check()
+        self.assertTrue(receipt["passed"], receipt["errors"])
+
     def test_escape_disguised_as_loader_relative_dependency_is_rejected(self):
         outside = self.root / "outside.dylib"
         self.compile(outside, dylib=True)
@@ -226,6 +232,14 @@ class LoadCommandParserTests(unittest.TestCase):
     def test_no_minimum_version_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "Missing macOS"):
             parse_load_commands(self.HEADER)
+
+    def test_system_install_name_does_not_follow_host_cryptex(self):
+        install_name = Path("/System/Library/Frameworks/WebKit.framework/Versions/A/WebKit")
+        with patch.object(Path, "resolve", side_effect=AssertionError("Must preserve system install name")):
+            self.assertEqual(loader_path(install_name), install_name)
+
+    def test_dotdot_cannot_disguise_external_path_as_system_library(self):
+        self.assertFalse(is_system(loader_path(Path("/System/Library/../../usr/local/lib/untrusted.dylib"))))
 
 
 if __name__ == "__main__":

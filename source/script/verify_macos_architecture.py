@@ -94,6 +94,15 @@ def contained(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
+def loader_path(path: Path) -> Path:
+    # Apple's absolute install names are stable even when a live system resolves
+    # them into a Cryptex volume. Normalize '..' first, but do not turn trusted
+    # /System/Library or /usr/lib install names into host-specific physical paths.
+    # App paths still resolve symlinks so an in-bundle path cannot hide an escape.
+    normalized = Path(os.path.normpath(path))
+    return normalized if is_system(normalized) else normalized.resolve()
+
+
 def sha256(path: Path) -> str:
     result = hashlib.sha256()
     with path.open("rb") as source:
@@ -183,9 +192,9 @@ def audit(app: Path, arch: str, minimum_macos: str,
     def expand(raw: str, loader: Path, executable: Path) -> Path:
         for token, base in (("@loader_path", loader.parent), ("@executable_path", executable.parent)):
             if raw == token or raw.startswith(token + "/"):
-                return (base / raw[len(token):].lstrip("/")).resolve()
+                return loader_path(base / raw[len(token):].lstrip("/"))
         if raw.startswith("/"):
-            return Path(raw).resolve()
+            return loader_path(Path(raw))
         raise ValueError("Unsupported relative loader path")
 
     # Walk each executable's dyld closure with its own executable directory and
@@ -217,7 +226,7 @@ def audit(app: Path, arch: str, minimum_macos: str,
         for dependency in node["dependencies"]:
             try:
                 if dependency.startswith("@rpath/"):
-                    candidates = [(base / dependency[7:]).resolve() for base in search]
+                    candidates = [loader_path(base / dependency[7:]) for base in search]
                 else:
                     candidates = [expand(dependency, path, executable)]
                 # System libraries can live only in the dyld cache, so do not
